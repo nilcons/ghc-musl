@@ -15,4 +15,12 @@ WORKDIR /tmp
 RUN curl -o cabal-install.tar.gz http://hackage.haskell.org/package/cabal-install-1.22.4.0/cabal-install-1.22.4.0.tar.gz
 RUN tar xvfz cabal-install.tar.gz
 WORKDIR /tmp/cabal-install-1.22.4.0
-RUN SCOPE_OF_INSTALLATION=--global ./bootstrap.sh
+RUN EXTRA_CONFIGURE_OPTS=--disable-library-profiling\ --enable-shared SCOPE_OF_INSTALLATION=--global ./bootstrap.sh
+
+WORKDIR /root
+ENV PATH=/root/.cabal/bin:$PATH
+CMD /bin/sh
+
+RUN cabal update
+
+#RUN /opt/bin/ghc --make -O2 --make -static -optc-static -optl-static /tmp/static.hs -optl-pthread -o /tmp/test
