@@ -1,5 +1,5 @@
 FROM alpine:latest
-RUN apk add --update curl xz alpine-sdk perl gmp-dev file gmp openssh openssl zlib-dev strace
+RUN apk add --update curl xz alpine-sdk perl gmp-dev file gmp openssh openssl zlib-dev strace vim less
 WORKDIR /tmp
 RUN curl -o ghc.tar.xz https://s3.eu-central-1.amazonaws.com/ghc-musl.nilcons.com/ghc-7.8.4-x86_64-unknown-linux-musl.tar.xz
 RUN xz -c -d /tmp/ghc.tar.xz | tar xf -
