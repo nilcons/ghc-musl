@@ -144,15 +144,18 @@ RUN : "Layer 4: install some packages" && \
     cabal install --global --only-dependencies && \
     cabal install --global && \
     cd /tmp && \
-    rm -rf bindings_posix
-
-# TODO: is optl--no-pie really needed in build.mk
-
-# TODO: hmatrix is hitting this one: https://github.com/albertoruiz/hmatrix/issues/100
-#       to get that far:
-#         echo "@testing http://dl-4.alpinelinux.org/alpine/edge/testing" >>/etc/apk/repositories
-#         apk add --update openblas-dev
-#         cabal install -f openblas hmatrix
+    rm -rf bindings_posix && \
+    : "hmatrix should use random in musl, not random_r, also openblas..." && \
+    echo "@testing http://dl-4.alpinelinux.org/alpine/edge/testing" >>/etc/apk/repositories && \
+    apk add --update openblas-dev@testing && \
+    cd /tmp && \
+    cabal unpack -d hmatrix hmatrix && \
+    cd /tmp/hmatrix/* && \
+    sed -i 's/def __APPLE__/ 1/' src/C/vector-aux.c && \
+    cabal install --global --only-dependencies && \
+    cabal install --global -f openblas && \
+    cd /tmp && \
+    rm -rf hmatrix
 
 # TODO: network-protocol-xmpp supports libgsasl only, not cyrus-sasl-dev,
 #       either have to fix that or put a libgsasl-dev into Alpine
