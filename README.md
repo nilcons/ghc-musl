@@ -103,7 +103,7 @@ You can find all this editions and labels on
 ## Use case: distribution of nc-indicators
 [See README.nc-indicators.md](README.nc-indicators.md)
 
-## Use case: full fledged Hackage LTS Docker playground
+## Use case: full fledged LTS Haskell Docker playground
 
 If you don't have anything to productionalize, you can also use the
 `nilcons/ghc-musl:latest` image just to play around with Haskell
@@ -173,8 +173,8 @@ volumes.
 
 Naturally (and maybe most urgently), we want to target versions of GHC
 other than 7.8.4 and various Stackage editions.  If any of this is
-important to you, please provide feedback to us on the Reddit thread
-(TODO: reddit link).
+important to you, please provide feedback to us
+[on the Reddit thread](http://www.reddit.com/r/haskell/comments/3a0q4y).
 
 ## About us
 
@@ -183,7 +183,7 @@ Nilcons is a small consulting and training shop in Zürich, Switzerland.
 For casual social networking, please join us on Twitter
 [https://twitter.com/nilconshq](@NilconsHQ).
 
-For feedback regarding this project, please use the Reddit thread
-(TODO: link).
+For feedback regarding this project, please use
+[the Reddit thread](http://www.reddit.com/r/haskell/comments/3a0q4y).
 
 For commercial enquiries please use the cons@nilcons.com email address.
