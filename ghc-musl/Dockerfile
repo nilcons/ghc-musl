@@ -13,6 +13,8 @@ RUN : "Layer 1: fully working basic GHC in /usr/local" && \
     cp -v /tmp/build.mk mk/build.mk && \
     patch -p1 </tmp/fix-execvpe-signature-ghc-7.8.4.patch && \
     PATH=/opt/ghc-cross/bin:$PATH ./configure && \
+    : "libffi has a bug, which we patch here" && \
+    sed -i 's,chmod,sed -i s/__gnu_linux__/1/ libffi/build/src/closures.c \&\& chmod,' libffi/ghc.mk && \
     make -j8 && \
     make binary-dist && \
     cd /tmp && \
