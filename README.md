@@ -181,7 +181,7 @@ important to you, please provide feedback to us
 Nilcons is a small consulting and training shop in Zürich, Switzerland.
 
 For casual social networking, please join us on Twitter
-[https://twitter.com/nilconshq](@NilconsHQ).
+[@NilconsHQ](https://twitter.com/nilconshq).
 
 For feedback regarding this project, please use
 [the Reddit thread](http://www.reddit.com/r/haskell/comments/3a0q4y).
