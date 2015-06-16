@@ -4,7 +4,14 @@ RUN : "Layer 1: fully working basic GHC in /usr/local" && \
     mkdir /tmp/ghc && \
     cd /tmp/ghc && \
     apk add --update curl xz alpine-sdk perl gmp-dev file gmp openssh openssl zlib-dev strace vim less jq ncurses-dev bash autoconf && \
-    sh /tmp/get-last-layer.sh nilcons/ghc-musl ghc-cross >ghc-cross.tar.gz && \
+    cd /tmp && \
+    wget https://nixos.org/releases/patchelf/patchelf-0.8/patchelf-0.8.tar.bz2 && \
+    tar xfj patchelf-0.8.tar.bz2 && \
+    cd patchelf-0.8 && \
+    ./configure && make install && \
+    cd .. && \
+    rm -rf patchelf* && \
+    sh /tmp/get-last-layer.sh nilcons/ghc-musl-auto ghc-cross >ghc-cross.tar.gz && \
     tar xvfz ghc-cross.tar.gz && \
     tar -xvJ -C / -f /tmp/ghc/ghc-7.8.4-x86_64-unknown-linux-musl.tar.xz && \
     wget https://www.haskell.org/ghc/dist/7.8.4/ghc-7.8.4-src.tar.bz2 && \
