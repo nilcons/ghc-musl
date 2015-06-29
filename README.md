@@ -109,7 +109,7 @@ If you don't have anything to productionalize, you can also use the
 `nilcons/ghc-musl:latest` image just to play around with Haskell
 without installing it on the host machine.
 
-Just use the `docker -it --rm nilcons/ghc-musl` command to start a
+Just use the `docker run -it --rm nilcons/ghc-musl` command to start a
 shell where you can run `ghci` to get a Haskell REPL with hundreds
 of libraries already shipped.
 
