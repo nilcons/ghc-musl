@@ -1,8 +1,10 @@
 FROM alpine:latest
-COPY get-last-layer.sh build.mk fix-execvpe-signature-ghc-7.8.4.patch /tmp/
+
+WORKDIR /tmp
+COPY get-last-layer.sh build.mk fix-execvpe-signature-ghc-7.8.4.patch ./
 RUN : "Layer 1: fully working basic GHC in /usr/local" && \
-    mkdir /tmp/ghc && \
-    cd /tmp/ghc && \
+    mkdir ghc && \
+    cd ghc && \
     apk add --update curl xz alpine-sdk perl gmp-dev file gmp openssh openssl zlib-dev strace vim less jq ncurses-dev bash autoconf && \
     cd /tmp && \
     curl -sSLO https://nixos.org/releases/patchelf/patchelf-0.8/patchelf-0.8.tar.bz2 && \
@@ -42,7 +44,6 @@ RUN : "Layer 1: fully working basic GHC in /usr/local" && \
 
 ENV PATH=/root/.cabal/bin:$PATH
 RUN : "Layer 2: cabal-install, but only the binary, no executables" && \
-    cd /tmp && \
     curl -sSLO https://hackage.haskell.org/package/cabal-install-1.22.4.0/cabal-install-1.22.4.0.tar.gz && \
     tar xvfz cabal-install-1.22.4.0.tar.gz && \
     cd cabal-install-1.22.4.0 && \
@@ -50,8 +51,8 @@ RUN : "Layer 2: cabal-install, but only the binary, no executables" && \
     cd / && \
     rm -rf /root/.ghc /tmp/cabal-install-1.22.4.0* /tmp/cabal- /root/.cabal/lib /root/.cabal/share
 
+WORKDIR /root/.cabal
 RUN : "Layer 3: cabal-install from stackage and stackage is set up" && \
-    cd /root/.cabal && \
     cabal update && \
     curl -sSL 'https://www.stackage.org/lts-2.12/cabal.config?global=true' >>config && \
     : Waiting for https://github.com/haskell/network/commit/6afe609308b90c1fd4b185978a15d44bc1dbd678 && \
@@ -72,6 +73,7 @@ RUN : "Layer 3: cabal-install from stackage and stackage is set up" && \
     cp /root/.cabal/config /root/.cabal/config.before-stackage && \
     curl -sSL 'https://www.stackage.org/lts-2.12/cabal.config?global=true' >>/root/.cabal/config
 
+WORKDIR /tmp
 RUN : "Layer 4: install some packages" && \
     : the ncurses hackage package is a little bit broken && \
     ln -s /usr/include /usr/include/ncursesw && \
@@ -108,9 +110,8 @@ RUN : "Layer 4: install some packages" && \
                            network-transport-tcp tasty tasty-hunit safecopy \
                            sodium unbounded-delays && \
     : template-default needs jailbraking && \
-    cd /tmp && \
     cabal unpack -d template-default template-default && \
-    cd /tmp/template-default/* && \
+    cd template-default/* && \
     sed s/2.9/2.10/ -i template-default.cabal && \
     cabal install --global --only-dependencies && \
     cabal install --global && \
@@ -169,4 +170,5 @@ RUN : "Layer 4: install some packages" && \
 # TODO: network-protocol-xmpp supports libgsasl only, not cyrus-sasl-dev,
 #       either have to fix that or put a libgsasl-dev into Alpine
 
+WORKDIR /
 CMD /bin/sh
