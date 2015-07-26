@@ -5,7 +5,7 @@ RUN : "Layer 1: fully working basic GHC in /usr/local" && \
     cd /tmp/ghc && \
     apk add --update curl xz alpine-sdk perl gmp-dev file gmp openssh openssl zlib-dev strace vim less jq ncurses-dev bash autoconf && \
     cd /tmp && \
-    wget https://nixos.org/releases/patchelf/patchelf-0.8/patchelf-0.8.tar.bz2 && \
+    curl -sSLO https://nixos.org/releases/patchelf/patchelf-0.8/patchelf-0.8.tar.bz2 && \
     tar xfj patchelf-0.8.tar.bz2 && \
     cd patchelf-0.8 && \
     ./configure && make install && \
@@ -14,7 +14,7 @@ RUN : "Layer 1: fully working basic GHC in /usr/local" && \
     sh /tmp/get-last-layer.sh nilcons/ghc-musl-auto ghc-cross >ghc-cross.tar.gz && \
     tar xvfz ghc-cross.tar.gz && \
     tar -xvJ -C / -f /tmp/ghc/ghc-7.8.4-x86_64-unknown-linux-musl.tar.xz && \
-    wget https://www.haskell.org/ghc/dist/7.8.4/ghc-7.8.4-src.tar.bz2 && \
+    curl -sSLO https://www.haskell.org/ghc/dist/7.8.4/ghc-7.8.4-src.tar.bz2 && \
     tar xvfj ghc-7.8.4-src.tar.bz2 && \
     cd /tmp/ghc/ghc-7.8.4 && \
     cp -v /tmp/build.mk mk/build.mk && \
@@ -43,7 +43,7 @@ RUN : "Layer 1: fully working basic GHC in /usr/local" && \
 ENV PATH=/root/.cabal/bin:$PATH
 RUN : "Layer 2: cabal-install, but only the binary, no executables" && \
     cd /tmp && \
-    wget https://hackage.haskell.org/package/cabal-install-1.22.4.0/cabal-install-1.22.4.0.tar.gz && \
+    curl -sSLO https://hackage.haskell.org/package/cabal-install-1.22.4.0/cabal-install-1.22.4.0.tar.gz && \
     tar xvfz cabal-install-1.22.4.0.tar.gz && \
     cd cabal-install-1.22.4.0 && \
     EXTRA_CONFIGURE_OPTS=--disable-library-profiling ./bootstrap.sh && \
@@ -53,7 +53,7 @@ RUN : "Layer 2: cabal-install, but only the binary, no executables" && \
 RUN : "Layer 3: cabal-install from stackage and stackage is set up" && \
     cd /root/.cabal && \
     cabal update && \
-    curl -sS 'https://www.stackage.org/lts-2.12/cabal.config?global=true' >>config && \
+    curl -sSL 'https://www.stackage.org/lts-2.12/cabal.config?global=true' >>config && \
     : Waiting for https://github.com/haskell/network/commit/6afe609308b90c1fd4b185978a15d44bc1dbd678 && \
     : to hit Stackage LTS, until that we have a workaround, but this should be "cabal install cabal-install" && \
     cabal install --global mtl network-uri parsec random stm text zlib && \
@@ -70,7 +70,7 @@ RUN : "Layer 3: cabal-install from stackage and stackage is set up" && \
     rm -rf /root/.cabal && \
     cabal update && \
     cp /root/.cabal/config /root/.cabal/config.before-stackage && \
-    curl -sS 'https://www.stackage.org/lts-2.12/cabal.config?global=true' >>/root/.cabal/config
+    curl -sSL 'https://www.stackage.org/lts-2.12/cabal.config?global=true' >>/root/.cabal/config
 
 RUN : "Layer 4: install some packages" && \
     : the ncurses hackage package is a little bit broken && \
