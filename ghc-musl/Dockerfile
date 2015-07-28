@@ -36,8 +36,9 @@ RUN : "Layer 1: fully working basic GHC in /usr/local" && \
 
 ENV PATH=/root/.cabal/bin:$PATH
 RUN : "Layer 2: cabal-install, but only the binary, no executables" && \
-    curl -L https://hackage.haskell.org/package/cabal-install-1.22.4.0/cabal-install-1.22.4.0.tar.gz | tar xz && \
-    cd cabal-install-1.22.4.0 && \
+    curl -L https://hackage.haskell.org/package/cabal-install-1.22.6.0/cabal-install-1.22.6.0.tar.gz | tar xz && \
+    cd cabal-install-1.22.6.0 && \
+    sed -i 's/export TMPDIR=.*/export TMPDIR=$(mktemp -t cabal-XXXXXX -d)/' bootstrap.sh && \
     EXTRA_CONFIGURE_OPTS=--disable-library-profiling ./bootstrap.sh && \
     : Clean up to keep the image small && \
     rm -rf /tmp/* /root/.ghc /root/.cabal/{lib,share}
@@ -66,28 +67,28 @@ RUN : "Layer 4: install some packages" && \
     cabal install --global alex happy && \
     cabal install --global c2hs && \
     cabal install --global gtk2hs-buildtools && \
-    cabal install --global attoparsec fgl haskell-src haskell-src-exts haskell-src-meta hashable html HUnit \
-                           parallel QuickCheck regex-base regex-compat regex-posix split syb \
-                           unordered-containers vector primitive async bytedump unix-bytestring colour \
-                           conduit criterion crypto-api cryptohash curl data-accessor-template \
-                           data-default data-memocombinators digest elerea filemanip foldl Glob \
-                           lens haskeline hflags hit hslogger HsOpenSSL hspec hybrid-vectors \
-                           kan-extensions lens-datetime linear mime-mail MissingH modular-arithmetic \
-                           monad-loops netwire network-conduit pipes pipes-bytestring pipes-safe \
-                           pipes-zlib pretty-show random-fu regex-tdfa regex-tdfa-rc regex-tdfa-text \
-                           SafeSemaphore snap snap-blaze statistics statvfs \
-                           temporary test-framework test-framework-hunit test-framework-th \
-                           test-framework-quickcheck2 thyme tls trifecta tz tzdata unix-time \
-                           utf8-string utility-ht vector-algorithms vector-th-unbox zip-archive \
-                           X11 xtest zeromq4-haskell Hfuse direct-sqlite sqlite-simple \
-                           gtk chart-gtk ncurses basic-prelude classy-prelude-conduit conduit-combinators \
-                           conduit-extra double-conversion hamlet http-client \
-                           http-client-tls http-conduit http-types path-pieces \
-                           persistent persistent-template shakespeare \
-                           shakespeare-css uuid xml-conduit yesod yesod-static \
-                           zlib-conduit acid-state clock distributed-process multimap \
-                           network-transport-tcp tasty tasty-hunit safecopy \
-                           sodium unbounded-delays && \
+    cabal install --global gtk chart-gtk && \
+    cabal install --global haskell-src haskell-src-exts haskell-src-meta && \
+    cabal install --global Glob HUnit Hfuse HsOpenSSL MissingH QuickCheck SafeSemaphore \
+                           X11 acid-state async attoparsec basic-prelude bytedump \
+                           classy-prelude-conduit clock colour conduit conduit-combinators \
+                           conduit-extra cookie criterion crypto-api crypto-pubkey \
+                           cryptohash curl data-accessor-template data-default data-memocombinators \
+                           digest direct-sqlite distributed-process double-conversion elerea fgl \
+                           filemanip foldl hamlet hashable haskeline hflags hit hslogger hspec html \
+                           http-client http-client-tls http-conduit http-types hybrid-vectors \
+                           kan-extensions lens lens-datetime linear mime-mail modular-arithmetic \
+                           monad-loops multimap ncurses netwire network-conduit network-transport-tcp \
+                           parallel parsers path-pieces persistent persistent-template pipes \
+                           pipes-bytestring pipes-safe pipes-zlib pretty-show primitive random-fu \
+                           regex-base regex-compat regex-posix regex-tdfa regex-tdfa-rc regex-tdfa-text \
+                           safecopy shakespeare shakespeare-css snap snap-blaze snap-core sodium split \
+                           sqlite-simple statistics statvfs syb tasty tasty-hunit temporary \
+                           test-framework test-framework-hunit test-framework-quickcheck2 test-framework-th \
+                           thyme tls trifecta tz tzdata unbounded-delays unix-bytestring \
+                           unix-time unordered-containers utf8-string utility-ht uuid vector \
+                           vector-algorithms vector-th-unbox x509 xml-conduit xtest yesod \
+                           yesod-static zeromq4-haskell zip-archive zlib-conduit && \
     : template-default needs jailbreaking && \
     cabal unpack -d template-default template-default && \
     cd template-default/* && \
