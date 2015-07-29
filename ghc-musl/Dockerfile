@@ -44,17 +44,15 @@ RUN : "Layer 2: cabal-install, but only the binary, no executables" && \
     rm -rf /tmp/* /root/.ghc /root/.cabal/{lib,share}
 
 WORKDIR /root/.cabal
-RUN : "Layer 3: cabal-install from stackage and stackage is set up" && \
+RUN : "Layer 3: install stack" && \
     cabal update && \
-    curl -L 'https://www.stackage.org/lts/cabal.config?global=true' >>config && \
-    cabal install --global cabal-install && \
-    : We regenerate the config with the stackage cabal, so that they are compatible. && \
-    cabal update && \
+    cabal install --global stack && \
+    stack setup && \
     : Clean up to keep the image small && \
-    rm -rf /tmp/*
+    rm -rf /root/.cabal
 
 WORKDIR /tmp
-RUN : "Layer 4: install some packages" && \
+RUN : "Layer 4: install packages" && \
     : the ncurses hackage package is a little bit broken && \
     ln -s /usr/include /usr/include/ncursesw && \
     apk add curl-dev openssl-dev zeromq-dev libx11-dev libxkbfile-dev libxfont-dev \
@@ -64,77 +62,58 @@ RUN : "Layer 4: install some packages" && \
             libxmu-dev libxext-dev libxdamage-dev libxxf86vm-dev libxi-dev libxrandr-dev \
             libxres-dev libxcursor-dev libxrender-dev libxvmc-dev fuse-dev \
             mesa-dev glu-dev freeglut-dev gtk+2.0-dev && \
-    cabal install --global alex happy && \
-    cabal install --global c2hs && \
-    cabal install --global gtk2hs-buildtools && \
-    cabal install --global gtk chart-gtk && \
-    cabal install --global haskell-src haskell-src-exts haskell-src-meta && \
-    cabal install --global Glob HUnit Hfuse HsOpenSSL MissingH QuickCheck SafeSemaphore \
-                           X11 acid-state async attoparsec basic-prelude bytedump \
-                           classy-prelude-conduit clock colour conduit conduit-combinators \
-                           conduit-extra cookie criterion crypto-api crypto-pubkey \
-                           cryptohash curl data-accessor-template data-default data-memocombinators \
-                           digest direct-sqlite distributed-process double-conversion elerea fgl \
-                           filemanip foldl hamlet hashable haskeline hflags hit hslogger hspec html \
-                           http-client http-client-tls http-conduit http-types hybrid-vectors \
-                           kan-extensions lens lens-datetime linear mime-mail modular-arithmetic \
-                           monad-loops multimap ncurses netwire network-conduit network-transport-tcp \
-                           parallel parsers path-pieces persistent persistent-template pipes \
-                           pipes-bytestring pipes-safe pipes-zlib pretty-show primitive random-fu \
-                           regex-base regex-compat regex-posix regex-tdfa regex-tdfa-rc regex-tdfa-text \
-                           safecopy shakespeare shakespeare-css snap snap-blaze snap-core sodium split \
-                           sqlite-simple statistics statvfs syb tasty tasty-hunit temporary \
-                           test-framework test-framework-hunit test-framework-quickcheck2 test-framework-th \
-                           thyme tls trifecta tz tzdata unbounded-delays unix-bytestring \
-                           unix-time unordered-containers utf8-string utility-ht uuid vector \
-                           vector-algorithms vector-th-unbox x509 xml-conduit xtest yesod \
-                           yesod-static zeromq4-haskell zip-archive zlib-conduit && \
+    stack install HUnit HsOpenSSL MissingH QuickCheck SafeSemaphore X11 acid-state \
+                  alex async attoparsec basic-prelude bytedump c2hs classy-prelude-conduit \
+                  clock colour conduit conduit-combinators conduit-extra cookie \
+                  criterion crypto-api crypto-pubkey cryptohash curl data-accessor-template \
+                  data-default data-memocombinators digest direct-sqlite distributed-process \
+                  double-conversion elerea fgl filemanip foldl gtk gtk2hs-buildtools hamlet happy \
+                  hashable haskeline haskell-src haskell-src-exts haskell-src-meta \
+                  hflags hit hslogger hspec html http-client http-client-tls \
+                  http-conduit http-types hybrid-vectors kan-extensions lens lens-datetime \
+                  linear mime-mail modular-arithmetic monad-loops multimap ncurses \
+                  netwire network-conduit network-transport-tcp parallel parsers \
+                  path-pieces persistent persistent-template pipes pipes-bytestring \
+                  pipes-safe pipes-zlib pretty-show primitive random-fu regex-base \
+                  regex-compat regex-posix regex-tdfa regex-tdfa-rc regex-tdfa-text \
+                  safecopy shakespeare shakespeare-css snap snap-blaze snap-core \
+                  sodium split sqlite-simple statistics statvfs syb tasty tasty-hunit \
+                  temporary test-framework test-framework-hunit test-framework-quickcheck2 \
+                  test-framework-th thyme tls trifecta tz tzdata unbounded-delays \
+                  unix-bytestring unix-time unordered-containers utf8-string utility-ht \
+                  uuid vector vector-algorithms vector-th-unbox x509 xml-conduit \
+                  xtest yesod yesod-static zeromq4-haskell zip-archive zlib-conduit && \
     : template-default needs jailbreaking && \
-    cabal unpack -d template-default template-default && \
-    cd template-default/* && \
-    sed s/2.9/2.10/ -i template-default.cabal && \
-    cabal install --global --only-dependencies && \
-    cabal install --global && \
-    cd /tmp && \
-    : gloss needs some love and a big pile of jailbreaking && \
-    cabal unpack -d gloss-rendering gloss-rendering-1.9.2.1 && \
-    cd gloss-rendering/* && \
-    sed -i 's/GLUT.*/GLUT,/' gloss-rendering.cabal && \
-    sed -i 's/OpenGL.*/OpenGL,/' gloss-rendering.cabal && \
-    cabal install --global --only-dependencies && \
-    cabal install --global && \
-    cd /tmp && \
-    cabal unpack -d gloss gloss-1.9.2.1 && \
-    cd gloss/* && \
-    sed -i 's/GLUT.*==.*/GLUT,/' gloss.cabal && \
-    sed -i 's/OpenGL.*==.*/OpenGL,/' gloss.cabal && \
-    cabal install --global --only-dependencies && \
-    cabal install --global && \
-    cd /tmp && \
+    stack unpack template-default && \
+    cd template-default-* && \
+    sed -i 's/2.9/2.10/' template-default.cabal && \
+    stack init && \
+    stack install && \
     : deepseq-th jailbreaking && \
-    cabal unpack -d deepseq-th deepseq-th && \
-    cd deepseq-th/* && \
+    cd /tmp && \
+    stack unpack deepseq-th && \
+    cd deepseq-th-* && \
     sed -i 's/base.*,/base,/' deepseq-th.cabal && \
     sed -i 's/2.9/2.10/' deepseq-th.cabal && \
-    cabal install --global --only-dependencies && \
-    cabal install --global && \
+    stack init && \
+    stack install && \
     cd /tmp && \
     : "bindings-posix fixes: musl has no POSIX2_{CHAR_TERM,LOCALEDEF}" && \
-    cabal unpack -d bindings-posix bindings-posix && \
-    cd bindings-posix/* && \
+    stack unpack bindings-posix && \
+    cd bindings-posix-* && \
     sed -i 's/#num _POSIX2_CHAR_TERM//' src/Bindings/Posix/Unistd.hsc && \
     sed -i 's/#num _POSIX2_LOCALEDEF//' src/Bindings/Posix/Unistd.hsc && \
-    cabal install --global --only-dependencies && \
-    cabal install --global && \
+    stack init && \
+    stack install && \
     cd /tmp && \
     : "hmatrix should use random in musl, not random_r, also openblas..." && \
     echo "@testing http://dl-4.alpinelinux.org/alpine/edge/testing" >>/etc/apk/repositories && \
     apk add --update openblas-dev@testing && \
-    cabal unpack -d hmatrix hmatrix && \
-    cd hmatrix/* && \
+    stack unpack hmatrix && \
+    cd hmatrix-* && \
     sed -i 's/def __APPLE__/ 1/' src/C/vector-aux.c && \
-    cabal install --global --only-dependencies && \
-    cabal install --global -f openblas && \
+    stack init && \
+    stack install --flag hmatrix:openblas && \
     : Clean up to keep the image small && \
     rm -rf /tmp/*
 
