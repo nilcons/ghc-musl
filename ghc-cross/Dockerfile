@@ -10,7 +10,7 @@ RUN tar xvfj ghc-7.8.4-src.tar.bz2
 WORKDIR /tmp/ghc-7.8.4
 
 COPY build.mk /tmp/ghc-7.8.4/mk/build.mk
-RUN ./configure --target=x86_64-pc-linux-musl --with-gcc=musl-gcc --with-ld=ld --with-nm=nm --with-ar=ar  --with-ranlib=ranlib --prefix=/opt/ghc-cross
+RUN ./configure --target=x86_64-pc-linux-musl --with-gcc=musl-gcc --with-ld=ld --with-nm=nm --with-ar=ar --with-ranlib=ranlib --prefix=/opt/ghc-cross
 
 # stole this from https://github.com/redneb/ghc-alt-libc, thanks!
 COPY fix-execvpe-signature-ghc-7.8.4.patch /tmp/fix-execvpe.patch
@@ -20,7 +20,7 @@ RUN patch -p1 </tmp/fix-execvpe.patch
 RUN sed -i s/terminfo// ghc.mk
 RUN sed -i s/terminfo// utils/ghc-pkg/ghc-pkg.cabal
 RUN sed -i s/unix,/unix/ utils/ghc-pkg/ghc-pkg.cabal
-RUN sed -i '1{p; s/.*/#define BOOTSTRAPPING/}' utils/ghc-pkg/Main.hs    
+RUN sed -i '1{p; s/.*/#define BOOTSTRAPPING/}' utils/ghc-pkg/Main.hs
 
 # update config.sub in libffi, so it supports x86_64-pc-linux
 RUN sed -i 's,chmod,cp /usr/share/misc/config.sub libffi/build/config.sub \&\& chmod,' libffi/ghc.mk
