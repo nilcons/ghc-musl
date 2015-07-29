@@ -1,12 +1,16 @@
 FROM alpine:latest
 
+ENV GHC_VERSION      7.8.4
+ENV PATCHELF_VERSION 0.8
+ENV CABAL_VERSION    1.22.6.0
+
 WORKDIR /tmp
-COPY get-last-layer.sh build.mk fix-execvpe-signature-ghc-7.8.4.patch ./
+COPY get-last-layer.sh build.mk fix-execvpe-signature-ghc-$GHC_VERSION.patch ./
 RUN : "Layer 1: fully working basic GHC in /usr/local" && \
     apk --update add curl xz alpine-sdk perl gmp-dev file gmp openssh openssl zlib-dev strace vim less jq ncurses-dev bash autoconf && \
     : Install patchelf && \
-    curl -L https://nixos.org/releases/patchelf/patchelf-0.8/patchelf-0.8.tar.bz2 | tar xj && \
-    cd patchelf-0.8 && \
+    curl -L https://nixos.org/releases/patchelf/patchelf-$PATCHELF_VERSION/patchelf-$PATCHELF_VERSION.tar.bz2 | tar xj && \
+    cd patchelf-$PATCHELF_VERSION && \
     ./configure && \
     make install && \
     : Overlay ghc cross compiler image && \
@@ -14,10 +18,10 @@ RUN : "Layer 1: fully working basic GHC in /usr/local" && \
     sh get-last-layer.sh nilcons/ghc-musl-auto ghc-cross | tar xzO | tar xJ -C / && \
     : Compile the ghc binary distribution && \
     cd /tmp && \
-    curl -L https://www.haskell.org/ghc/dist/7.8.4/ghc-7.8.4-src.tar.bz2 | tar xj && \
-    cd ghc-7.8.4 && \
+    curl -L https://www.haskell.org/ghc/dist/$GHC_VERSION/ghc-$GHC_VERSION-src.tar.bz2 | tar xj && \
+    cd ghc-$GHC_VERSION && \
     cp -v /tmp/build.mk mk/build.mk && \
-    patch -p1 </tmp/fix-execvpe-signature-ghc-7.8.4.patch && \
+    patch -p1 </tmp/fix-execvpe-signature-ghc-$GHC_VERSION.patch && \
     PATH=/opt/ghc-cross/bin:$PATH ./configure && \
     : patch libffi bug && \
     sed -i 's,chmod,sed -i s/__gnu_linux__/1/ libffi/build/src/closures.c \&\& chmod,' libffi/ghc.mk && \
@@ -25,7 +29,7 @@ RUN : "Layer 1: fully working basic GHC in /usr/local" && \
     make binary-dist && \
     : Install the ghc binary distribution to minimize docker layer size && \
     cd /tmp && \
-    tar xjf ghc-7.8.4/ghc-7.8.4-x86_64-unknown-linux.tar.bz2 --transform 's/^ghc-7.8.4/ghc-binary-dist/' && \
+    tar xjf ghc-$GHC_VERSION/ghc-$GHC_VERSION-x86_64-unknown-linux.tar.bz2 --transform "s/^ghc-${GHC_VERSION}/ghc-binary-dist/" && \
     cd ghc-binary-dist && \
     ./configure && \
     : musl ld requires --no-pie to work for some reason with ghc && \
@@ -36,8 +40,8 @@ RUN : "Layer 1: fully working basic GHC in /usr/local" && \
 
 ENV PATH=/root/.cabal/bin:$PATH
 RUN : "Layer 2: cabal-install, but only the binary, no executables" && \
-    curl -L https://hackage.haskell.org/package/cabal-install-1.22.6.0/cabal-install-1.22.6.0.tar.gz | tar xz && \
-    cd cabal-install-1.22.6.0 && \
+    curl -L https://hackage.haskell.org/package/cabal-install-$CABAL_VERSION/cabal-install-$CABAL_VERSION.tar.gz | tar xz && \
+    cd cabal-install-$CABAL_VERSION && \
     sed -i 's/export TMPDIR=.*/export TMPDIR=$(mktemp -t cabal-XXXXXX -d)/' bootstrap.sh && \
     EXTRA_CONFIGURE_OPTS=--disable-library-profiling ./bootstrap.sh && \
     : Clean up to keep the image small && \
